@@ -12,5 +12,9 @@
   "license": "MIT",
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.3",
+    "graphql": "^16.8.1"
   }
 }
