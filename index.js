@@ -32,14 +32,7 @@ let authors = [
  * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan yhteyteen tekijän nimen sijaan tekijän id
  * Yksinkertaisuuden vuoksi tallennamme kuitenkin kirjan yhteyteen tekijän nimen
  *
- * English:
- * It might make more sense to associate a book with its author by storing the author's id in the context of the book instead of the author's name
- * However, for simplicity, we will store the author's name in connection with the book
- *
- * Spanish:
- * Podría tener más sentido asociar un libro con su autor almacenando la id del autor en el contexto del libro en lugar del nombre del autor
- * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conección con el libro
-*/
+*/ 
 
 let books = [
   {
@@ -93,19 +86,59 @@ let books = [
   },
 ]
 
-/*
-  you can remove the placeholder query once your first one has been implemented 
-*/
 
 const typeDefs = `
+type Book {
+  title: String!
+  author: String
+  published: Int
+  genres: [String!]!
+  id: ID! 
+}
+type Author {
+  name: String!
+  born: String
+  bookCount: Int!
+  id: ID!
+}
   type Query {
-    dummy: Int
+    authorCount: Int!
+    bookCount: Int!
+    allBooks(author: String): [Book!]!
+    allAuthors: [Author!]!
   }
 `
+const uniques = books.reduce((acc, val) => {
+  acc[val.author] = acc[val.author] === undefined ? 1 : acc[val.author] += 1
+  return acc
+}, {})
 
+
+
+
+//uniques 
+// from https://stackoverflow.com/questions/15052702/count-unique-elements-in-array-without-sorting
 const resolvers = {
   Query: {
-    dummy: () => 0
+    bookCount: () => books.length,
+    authorCount: () => {
+      const authrs = books.map(b => b.author)
+      const count = new Set(authrs).size
+      return count
+    },
+    allBooks: (root, args) => {
+      console.log("args.author", args.author)
+      if(!args.author) {return books} 
+
+      return (books.filter(b => b.author === args.author)) 
+    },
+    allAuthors: () => authors
+  },
+  Author: {
+    name: (root) => root.name,
+    born: (root) => root.born,
+    bookCount: (root) => uniques[root.name],
+    id: (root) => root.id
   }
 }
 
