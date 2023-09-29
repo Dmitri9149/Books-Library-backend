@@ -1,7 +1,7 @@
-The backend "Books" which I constructed while learning the course [FullStackOpen](https://fullstackopen.com/en/part8).
+The backend "Books Library" which I constructed while learning the course [FullStackOpen](https://fullstackopen.com/en/part8).
 The backend is based on the exercises of the part 8 of the course.  
 This is GraphQL backend.  
-  
+
 To be run with "Books" frontend which is here:  
 ```diff
 - TODO 
