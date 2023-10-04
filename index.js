@@ -146,30 +146,37 @@ const typeDefs = `
       ) : Author
   }
 `
-const uniques = () => books.reduce((acc, val) => {
-  acc[val.author] = acc[val.author] === undefined ? 1 : acc[val.author] += 1
-  return acc
-}, {})
-
-
-
 
 //uniques 
 // from https://stackoverflow.com/questions/15052702/count-unique-elements-in-array-without-sorting
+const uniques = async ( ) => {
+  const books = await Book.find({})
+  const booksToReturn= books.reduce((acc, val) => {
+  acc[val.author] = acc[val.author] === undefined ? 1 : acc[val.author] += 1
+  return acc
+}, {})
+  return booksToReturn
+}
+
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => {
+    bookCount: async () => Book.collection.countDocuments(),
+    authorCount: async () => {
+      const books = await Book.find({})
       const authrs = books.map(b => b.author)
       const count = new Set(authrs).size
       return count
     },
-    allBooks: (root, args) => {
+    allBooks: async (root, args) => {
       console.log("args.author", args.author)
-      const select_by_author = 
+
+      const cnt = await Book.find({})
+      console.log("Book !!!!", cnt)
+
+      const select_by_author =  
       !args.author 
-      ? books 
-      : books.filter(b => b.author === args.author)
+      ? await Book.find({}) 
+      : Book.find({author: args.author.name})
       console.log("select by author", select_by_author)
       const select_by_genre = 
       !args.genre 
@@ -177,7 +184,7 @@ const resolvers = {
       : select_by_author.filter(b => b.genres.includes(args.genre))
       return (select_by_genre)
     },
-    allAuthors: () => authors
+    allAuthors: async () => Author.find({})
   },
   Author: {
     name: (root) => root.name,
@@ -186,13 +193,13 @@ const resolvers = {
     id: (root) => root.id
   },
   Mutation: {
-    addAuthor: (root, args) => {
-      const author = { ...args, id: uuid() }
-      authors = authors.concat(author)
-      return author
+    addAuthor: async (root, args) => {
+      const author = new Author ({ ...args })
+      return author.save()
     },
-    addBook: (root, args) => {
-      if (books.find(p => p.title === args.title)) {
+    addBook: async (root, args) => {
+      const bookExist = Book.find({title:args.title})
+      if (bookExist) {
         throw new GraphQLError('Title must be unique', {
           extensions: {
             code: 'BAD_USER_INPUT',
@@ -201,23 +208,20 @@ const resolvers = {
         })
       }
 
-      const inAuthors = authors.find(a => a.name === args.author)
+      const inAuthors = Author.find({name:args.author})
       if (!inAuthors) {
-        const author = { name: args.author, id: uuid() }
-        authors = authors.concat(author)
+        const author = new Author ({ name: args.author })
+        author.save()
       }
 
-      const book = { ...args, id: uuid() }
-      books = books.concat(book)    
-      return book
+      const book = new Book({ ...args})   
+      return book.save()
     },
-    editAuthor: (root, args) => {
-      const author = authors.find(a => a.name === args.name)
+    editAuthor: async (root, args) => {
+      const author = await Author.find({name: args.name})
       if (!author) {return null}
-
-      const updatedAuthor = { ...author, born: args.setBornTo }
-      authors = authors.map(p => p.name === args.name ? updatedAuthor : p)
-      return updatedAuthor
+      author.born = args.setToBorn
+      return author.save()
     }
   }
 }
