@@ -161,28 +161,18 @@ const uniques = async ( ) => {
 const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
-    authorCount: async () => {
-      const books = await Book.find({})
-      const authrs = books.map(b => b.author)
-      const count = new Set(authrs).size
-      return count
-    },
+    authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      console.log("args.author", args.author)
-
-      const cnt = await Book.find({})
-      console.log("Book !!!!", cnt)
-
-      const select_by_author =  
-      !args.author 
-      ? await Book.find({}) 
-      : Book.find({author: args.author.name})
-      console.log("select by author", select_by_author)
-      const select_by_genre = 
-      !args.genre 
-      ? select_by_author
-      : select_by_author.filter(b => b.genres.includes(args.genre))
-      return (select_by_genre)
+      const author = await Author.findOne({ name: args.author })
+      if(args.author && args.genres) {
+        return await Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
+      } else if (args.author) {
+        return await Book.find({author:author.id}).populate('author')
+      } else if (args.genre) {
+        return await Book.find({genres:{$in:[args.genre]}}).populate('author')
+      } else { 
+        return await Book.find({}).populate('author')
+      }
     },
     allAuthors: async () => Author.find({})
   },
