@@ -177,16 +177,17 @@ const resolvers = {
     allAuthors: async () => Author.find({}).populate('book')
   },
   Author: {
-    name: (root) => root.name,
-    born: (root) => root.born,
-    bookCount: (root) => uniques()[root.name],
-    id: (root) => root.id
+    bookCount: async (root) => {
+      const author = await Author.findOne({name:args.author})
+      const books = await Book.find({ author: author.id }).countDocuments({})
+      return books.length
+    }
   },
   Mutation: {
-    addAuthor: async (root, args) => {
+/*    addAuthor: async (root, args) => {
       const author = new Author ({ ...args })
       return author.save()
-    },
+    }, */
     addBook: async (root, args) => {
       const bookExist = Book.find({title:args.title})
       if (bookExist) {
@@ -198,20 +199,28 @@ const resolvers = {
         })
       }
 
-      const inAuthors = Author.find({name:args.author})
+      const inAuthors = Author.findOne({name:args.author})
       if (!inAuthors) {
-        const author = new Author ({ name: args.author })
-        author.save()
+        const newAuthor = new Author ({ name: args.author })
+        await newAuthor.save()
       }
-
       const book = new Book({ ...args})   
-      return book.save()
+      await book.save()
+
+      const author = Author.findOne({name:args.author})
+      author.books = author.books.concat(book.id)
+      await author.save()
+
+      const newBook = await Book.findById(book.id).populate('author')
+      
+      return newBook
+
     },
     editAuthor: async (root, args) => {
-      const author = await Author.find({name: args.name})
+      const author = await Author.findOne({name: args.name})
       if (!author) {return null}
       author.born = args.setToBorn
-      return author.save()
+      return await author.save()
     }
   }
 }
