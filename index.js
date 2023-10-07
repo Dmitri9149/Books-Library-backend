@@ -174,7 +174,7 @@ const resolvers = {
         return await Book.find({}).populate('author')
       }
     },
-    allAuthors: async () => Author.find({})
+    allAuthors: async () => Author.find({}).populate('book')
   },
   Author: {
     name: (root) => root.name,
