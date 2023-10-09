@@ -147,40 +147,45 @@ const typeDefs = `
   }
 `
 
-//uniques 
-// from https://stackoverflow.com/questions/15052702/count-unique-elements-in-array-without-sorting
-const uniques = async ( ) => {
-  const books = await Book.find({})
-  const booksToReturn= books.reduce((acc, val) => {
-  acc[val.author] = acc[val.author] === undefined ? 1 : acc[val.author] += 1
-  return acc
-}, {})
-  return booksToReturn
-}
-
 const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
-    allBooks: async (root, args) => {
+/*    allBooks: async (root, args) => {
       const author = await Author.findOne({ name: args.author })
+      console.log("author in book", author)
       if(args.author && args.genres) {
-        return await Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
+//        const author1 = await Author.findOne({ name: args.author })
+        const books1 =  await Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
+        console.log(" author and genre", books1)
+        return books1
+
       } else if (args.author) {
+//        const author2 = await Author.findOne({ name: args.author })
         return await Book.find({author:author.id}).populate('author')
       } else if (args.genre) {
         return await Book.find({genres:{$in:[args.genre]}}).populate('author')
       } else { 
-        return await Book.find({}).populate('author')
+        const books4 =  await Book.find({})
+        console.log(" author and genre no args, BOOOKKKS! ", books4)
+        return books4
       }
+    }, */
+    allBooks: async (root, args) => {
+      const books = await Book.find({}).populate('author') 
+      console.log("BOOOOOOK", books)
+      return books
     },
-    allAuthors: async () => Author.find({}).populate('book')
+
+    allAuthors: async () => Author.find({})
   },
   Author: {
     bookCount: async (root) => {
-      const author = await Author.findOne({name:args.author})
-      const books = await Book.find({ author: author.id }).countDocuments({})
-      return books.length
+      const author = await Author.findOne({name:root.name})
+      console.log("author", author)
+      console.log("root author", root.name)
+      const booksQuantity = await Book.find({ author: author.id }).countDocuments({})
+      return booksQuantity
     }
   },
   Mutation: {
