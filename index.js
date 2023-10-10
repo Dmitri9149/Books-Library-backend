@@ -108,7 +108,6 @@ let books = [
   },
 ]
 
-
 const typeDefs = `
   type Book {
     title: String!
@@ -159,7 +158,6 @@ const resolvers = {
         const books1 =  await Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
         console.log(" author and genre", books1)
         return books1
-
       } else if (args.author) {
 //        const author2 = await Author.findOne({ name: args.author })
         return await Book.find({author:author.id}).populate('author')
