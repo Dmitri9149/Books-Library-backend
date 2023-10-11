@@ -141,7 +141,7 @@ const typeDefs = `
     ): Author
     editAuthor(
       name: String!
-      setBornTo: Int!
+      born: Int!
       ) : Author
   }
 `
@@ -175,7 +175,7 @@ const resolvers = {
       return books
     }, */
 
-    allAuthors: async () => Author.find({}).populate('books')
+    allAuthors: async () => Author.find({})
   },
   Author: {
     bookCount: async (root) => {
@@ -192,7 +192,8 @@ const resolvers = {
       return author.save()
     }, */
     addBook: async (root, args) => {
-      const bookExist = Book.find({title:args.title})
+      const bookExist = await Book.findOne({title:args.title})
+      console.log("IN add Book ", bookExist)
       if (bookExist) {
         throw new GraphQLError('Title must be unique', {
           extensions: {
@@ -201,28 +202,34 @@ const resolvers = {
           }
         })
       }
-
-      const inAuthors = Author.findOne({name:args.author})
-      if (!inAuthors) {
-        const newAuthor = new Author ({ name: args.author })
-        await newAuthor.save()
+      const currentAuthor = await Author.findOne({name:args.author})
+      console.log("In add BOOK current author", currentAuthor)
+      if(!currentAuthor) {
+        const newAuthor = new Author({ name: args.author })
+        try {
+          await newAuthor.save()
+        } 
+        catch(error) {
+          throw new GraphQLError('Adding new author failed', {
+            extensions: {
+              code:'BAD_USER_INPUT',
+              invalidArgs: args,
+              error
+            }
+          })
+        }
       }
-      const book = new Book({ ...args})   
+      const savedAuthor = await Author.findOne({ name: args.author })
+      console.log("IN ADD BOOK", savedAuthor)
+      const book = new Book({ ...args, author:savedAuthor.id})   
       await book.save()
-
-      const author = Author.findOne({name:args.author})
-      author.books = author.books.concat(book.id)
-      await author.save()
-
       const newBook = await Book.findById(book.id).populate('author')
-      
       return newBook
-
     },
     editAuthor: async (root, args) => {
       const author = await Author.findOne({name: args.name})
       if (!author) {return null}
-      author.born = args.setToBorn
+      author.born = args.born
       return await author.save()
     }
   }
