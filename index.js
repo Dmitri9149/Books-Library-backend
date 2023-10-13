@@ -152,29 +152,16 @@ const resolvers = {
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       const author = await Author.findOne({ name: args.author })
-      console.log("author in book", author)
       if(args.author && args.genres) {
-//        const author1 = await Author.findOne({ name: args.author })
-        const books1 =  await Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
-        console.log(" author and genre", books1)
-        return books1
+        return Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
       } else if (args.author) {
-//        const author2 = await Author.findOne({ name: args.author })
-        return await Book.find({author:author.id}).populate('author')
+        return Book.find({author:author.id}).populate('author')
       } else if (args.genre) {
-        return await Book.find({genres:{$in:[args.genre]}}).populate('author')
+        return Book.find({genres:{$in:[args.genre]}}).populate('author')
       } else { 
-        const books4 =  await Book.find({}).populate('author')
-        console.log(" author and genre no args, BOOOKKKS! ", books4)
-        return books4
+        return Book.find({}).populate('author')
       }
     },
-/*    allBooks: async (root, args) => {
-      const books = await Book.find({}).populate('author') 
-      console.log("BOOOOOOK", books)
-      return books
-    }, */
-
     allAuthors: async () => Author.find({})
   },
   Author: {
@@ -187,13 +174,8 @@ const resolvers = {
     }
   },
   Mutation: {
-/*    addAuthor: async (root, args) => {
-      const author = new Author ({ ...args })
-      return author.save()
-    }, */
     addBook: async (root, args) => {
       const bookExist = await Book.findOne({title:args.title})
-      console.log("IN add Book ", bookExist)
       if (bookExist) {
         throw new GraphQLError('Title must be unique', {
           extensions: {
@@ -203,7 +185,6 @@ const resolvers = {
         })
       }
       const currentAuthor = await Author.findOne({name:args.author})
-      console.log("In add BOOK current author", currentAuthor)
       if(!currentAuthor) {
         const newAuthor = new Author({ name: args.author })
         try {
@@ -220,7 +201,6 @@ const resolvers = {
         }
       }
       const savedAuthor = await Author.findOne({ name: args.author })
-      console.log("IN ADD BOOK", savedAuthor)
       const book = new Book({ ...args, author:savedAuthor.id})   
       await book.save()
       const newBook = await Book.findById(book.id).populate('author')
@@ -230,7 +210,7 @@ const resolvers = {
       const author = await Author.findOne({name: args.name})
       if (!author) {return null}
       author.born = args.born
-      return await author.save()
+      return author.save()
     }
   }
 }
