@@ -24,6 +24,13 @@ mongoose.connect(MONGODB_URI)
   })
 
 const typeDefs = `
+  type User {
+    username: String!
+    id: ID!
+  }
+  type Token {
+    value: String!
+  }
   type Book {
     title: String!
     author: Author!
@@ -42,6 +49,7 @@ const typeDefs = `
     bookCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+    me: User
   }
   type Mutation {
     addBook(
@@ -57,7 +65,14 @@ const typeDefs = `
     editAuthor(
       name: String!
       born: Int!
-      ) : Author
+    ) : Author
+    createUser(
+        username: String!
+    ) : User
+    login(
+        username: String!
+        password: String!
+    ) : Token
   }
 `
 
