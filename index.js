@@ -8,6 +8,7 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 const Author = require('./models/author')
 const Book = require('./models/book')
+const User = require('./models/user')
 
 require('dotenv').config()
 
@@ -141,7 +142,10 @@ const resolvers = {
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
     },
     addBook: async (root, args, context) => {
+      console.log("IN ADD BOOOOOOOK")
       const currentUser = context.currentUser
+
+      console.log("Current user UUUUUUUUUUUU", currentUser)
 
       if (!currentUser) {
         throw new GraphQLError('not authenticated', {
@@ -216,7 +220,7 @@ startStandaloneServer(server, {
         auth.substring(7), process.env.JWT_SECRET
       )
       const currentUser = await User
-        .findById(decodedToken.id).populate('friends')
+        .findById(decodedToken.id)
       return { currentUser }
     }
   },
