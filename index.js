@@ -114,6 +114,17 @@ const resolvers = {
         username: args.username,
         favoriteGenre: args.favoriteGenre 
       })
+
+      const userExist = await User.findOne({username:args.username})
+      if (userExist) {
+        throw new GraphQLError 
+        ('The user already exist', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username
+          }
+        })
+      }
   
       return user.save()
         .catch(error => {
