@@ -97,14 +97,13 @@ const resolvers = {
     },
     allAuthors: async () => Author.find({}),
     me: (root, args, context) => {
+      console.log("In me context.currentUser", context.currentUser)
       return context.currentUser
     }
   },
   Author: {
     bookCount: async (root) => {
       const author = await Author.findOne({name:root.name})
-      console.log("author", author)
-      console.log("root author", root.name)
       const booksQuantity = await Book.find({ author: author.id }).countDocuments({})
       return booksQuantity
     }
@@ -225,6 +224,7 @@ startStandaloneServer(server, {
       )
       const currentUser = await User
         .findById(decodedToken.id)
+      console.log("CURRENT USER ", currentUser)
       return { currentUser }
     }
   },
