@@ -128,8 +128,10 @@ const resolvers = {
       const newBook = await Book.findById(book.id).populate('author')
       return newBook
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      console.log("In ADD AUTHOR")
       const currentUser = context.currentUser
+      console.log("Current user UUUUUUUUUUUU", currentUser)
 
       if (!currentUser) {
         throw new GraphQLError('not authenticated', {
