@@ -12,6 +12,7 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
+      console.log("In ALL BOOKS")
       const author = await Author.findOne({ name: args.author })
       if(args.author && args.genre && args.genre !== "all genres") {
         return Book.find({author:author.id, genres:{$in:[args.genre]}}).populate('author')
@@ -27,7 +28,7 @@ const resolvers = {
     },
     allAuthors: async () => {
       console.log("Author.find")
-      return Author.find({})
+      return Author.find({}).populate('books')
     },
     me: (root, args, context) => {
       console.log("In me context.currentUser", context.currentUser)
@@ -36,9 +37,8 @@ const resolvers = {
   },
   Author: {
     bookCount: async (root) => {
-      const author = await Author.findOne({name:root.name})
-      const booksQuantity = await Book.find({ author: author.id }).countDocuments({})
-      return booksQuantity
+      console.log("BOOK COUNT")
+      return root.books.length
     }
   },
   Mutation: {
