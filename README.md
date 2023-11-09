@@ -1,4 +1,4 @@
-This is GraphQL server backend for the 'Books Library' application. The frontend is here [Book Library, frontend]()
+This is GraphQL server backend for the 'Books Library' application. The frontend is here [Book Library, frontend](https://github.com/Dmitri9149/Books-Library-frontend)
 
 MongoDB is used to store the 'Books Library' details. 
 
