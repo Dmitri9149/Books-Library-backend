@@ -14,9 +14,6 @@ const jwt = require('jsonwebtoken')
 
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
-const Author = require('./models/author')
-const Book = require('./models/book')
-const User = require('./models/user')
 
 const typeDefs = require('./schema')
 const resolvers = require('./resolvers')
@@ -37,7 +34,6 @@ mongoose.connect(MONGODB_URI)
 
   mongoose.set('debug', true)
 
-// setup is now within a function
 const start = async () => {
   const app = express()
   const httpServer = http.createServer(app)
